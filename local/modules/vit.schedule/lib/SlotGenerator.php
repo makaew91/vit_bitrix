@@ -51,6 +51,19 @@ class SlotGenerator
         return (int) date('N', strtotime($date));
     }
 
+    public static function getShortDayNames(): array
+    {
+        return [
+            1 => 'Пн',
+            2 => 'Вт',
+            3 => 'Ср',
+            4 => 'Чт',
+            5 => 'Пт',
+            6 => 'Сб',
+            7 => 'Вс',
+        ];
+    }
+
     public static function getWeekSchedule(string $date): array
     {
         $timestamp = strtotime($date);
@@ -80,7 +93,7 @@ class SlotGenerator
             $week[] = [
                 'day_of_week' => $dayNum,
                 'name' => $dayNames[$dayNum],
-                'short_name' => mb_substr($dayNames[$dayNum], 0, 2),
+                'short_name' => self::getShortDayNames()[$dayNum],
                 'date' => $dayDate,
                 'date_formatted' => date('d.m', $dayTimestamp),
                 'is_working' => $isWorking,

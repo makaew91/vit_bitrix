@@ -16,7 +16,7 @@ class VitScheduleSlotsComponent extends CBitrixComponent
             return;
         }
 
-        $date = $this->arParams['DATE'] ?? date('Y-m-d');
+        $date = $this->arParams['DATE'] ?? $_GET['date'] ?? date('Y-m-d');
 
         if (!strtotime($date)) {
             $date = date('Y-m-d');

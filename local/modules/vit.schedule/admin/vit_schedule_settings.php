@@ -5,9 +5,15 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_ad
 use Bitrix\Main\Loader;
 use Vit\Schedule\ScheduleTable;
 
+/** @global CUser $USER */
+/** @global CMain $APPLICATION */
+
 Loader::includeModule('vit.schedule');
 
-/** @var CMain $APPLICATION */
+if (!$USER->IsAdmin()) {
+    $APPLICATION->AuthForm('Нет доступа');
+}
+
 $APPLICATION->SetTitle('Расписание врача');
 
 $message = null;
@@ -16,7 +22,9 @@ $dayNames = ScheduleTable::getDayNames();
 // Save handler
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_bitrix_sessid()) {
     $errors = [];
+    $data = [];
 
+    // Validate all days first
     for ($day = 1; $day <= 7; $day++) {
         $isWorking = ($_POST['IS_WORKING'][$day] ?? 'N') === 'Y' ? 'Y' : 'N';
         $timeFrom = trim($_POST['TIME_FROM'][$day] ?? '');
@@ -25,33 +33,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && check_bitrix_sessid()) {
         if ($isWorking === 'Y') {
             if ($timeFrom === '' || $timeTo === '') {
                 $errors[] = $dayNames[$day] . ': укажите время начала и окончания';
-                continue;
-            }
-            if ($timeFrom >= $timeTo) {
+            } elseif ($timeFrom >= $timeTo) {
                 $errors[] = $dayNames[$day] . ': время начала должно быть раньше окончания';
-                continue;
             }
         }
 
-        $row = ScheduleTable::getByDayOfWeek($day);
-        if ($row) {
-            ScheduleTable::update($row['ID'], [
-                'IS_WORKING' => $isWorking,
-                'TIME_FROM' => $isWorking === 'Y' ? $timeFrom : null,
-                'TIME_TO' => $isWorking === 'Y' ? $timeTo : null,
-            ]);
-        }
+        $data[$day] = [
+            'IS_WORKING' => $isWorking,
+            'TIME_FROM' => $isWorking === 'Y' ? $timeFrom : null,
+            'TIME_TO' => $isWorking === 'Y' ? $timeTo : null,
+        ];
     }
 
-    if (!empty($errors)) {
-        $message = new CAdminMessage([
-            'MESSAGE' => implode('<br>', $errors),
-            'TYPE' => 'ERROR',
-        ]);
-    } else {
+    // Save only if no errors
+    if (empty($errors)) {
+        for ($day = 1; $day <= 7; $day++) {
+            $row = ScheduleTable::getByDayOfWeek($day);
+            if ($row) {
+                ScheduleTable::update($row['ID'], $data[$day]);
+            }
+        }
+
         $message = new CAdminMessage([
             'MESSAGE' => 'Расписание сохранено',
             'TYPE' => 'OK',
+        ]);
+    } else {
+        $message = new CAdminMessage([
+            'MESSAGE' => implode('<br>', $errors),
+            'TYPE' => 'ERROR',
         ]);
     }
 }

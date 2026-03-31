@@ -1,9 +1,7 @@
 <?php
 
 use Bitrix\Main\Application;
-use Bitrix\Main\Loader;
 use Bitrix\Main\ModuleManager;
-use Bitrix\Main\IO\Directory;
 
 class vit_schedule extends CModule
 {

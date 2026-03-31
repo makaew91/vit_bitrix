@@ -3,6 +3,9 @@
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Loader;
 
+/** @global CMain $APPLICATION */
+global $APPLICATION;
+
 Loader::includeModule('vit.schedule');
 
 /** @var string $mid — module ID, set by Bitrix */
