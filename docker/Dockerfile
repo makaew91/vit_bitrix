@@ -30,6 +30,7 @@ RUN echo '\
     mbstring.func_overload = 0\n\
     opcache.revalidate_freq = 0\n\
     display_errors = On\n\
+    date.timezone = Europe/Moscow\n\
     ' > /usr/local/etc/php/conf.d/bitrix.ini
 
 RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
